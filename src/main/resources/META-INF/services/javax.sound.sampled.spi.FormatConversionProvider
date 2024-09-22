@@ -1,2 +1,2 @@
 # for the vorbis decoder
-javazoom.spi.vorbis.sampled.convert.VorbisFormatConversionProvider
+org.firedragon91245.spi.vorbis.sampled.convert.VorbisFormatConversionProvider

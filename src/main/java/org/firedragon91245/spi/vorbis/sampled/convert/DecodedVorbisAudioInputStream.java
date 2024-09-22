@@ -21,7 +21,7 @@
  * ----------------------------------------------------------------------------
  */
  
-package javazoom.spi.vorbis.sampled.convert;
+package org.firedragon91245.spi.vorbis.sampled.convert;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ import java.util.Map;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 
-import javazoom.spi.PropertiesContainer;
+import org.firedragon91245.spi.PropertiesContainer;
 
 import org.tritonus.share.TDebug;
 import org.tritonus.share.sampled.convert.TAsynchronousFilteredAudioInputStream;
@@ -126,7 +126,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
    */
   public Map properties()
   {
-	  properties.put("ogg.position.byte",new Long(currentBytes));
+	  properties.put("ogg.position.byte", currentBytes);
 	  return properties;	 
   }
   /**

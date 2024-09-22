@@ -20,7 +20,7 @@
  *
  */
 
-package javazoom.spi.vorbis.sampled.file;
+package org.firedragon91245.spi.vorbis.sampled.file;
 
 import java.util.Map;
 

@@ -1,6 +1,5 @@
 Manifest-Version: 1.0
-Archiver-Version: Plexus Archiver
-Created-By: Apache Maven
-Built-By: patrik
-Build-Jdk: 1.8.0_51
-
+Implementation-Title: vorbisspi-repackaged
+Implementation-URL: https://github.com/FireDragon91245/vorbisspi-repackaged
+Implementation-Vendor: FireDragon91245
+Implementation-Version: 1.0

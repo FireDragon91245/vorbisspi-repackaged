@@ -20,7 +20,7 @@
  *
  */
  
-package javazoom.spi.vorbis.sampled.file;
+package org.firedragon91245.spi.vorbis.sampled.file;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -169,7 +169,7 @@ public class VorbisAudioFileReader extends TAudioFileReader
     }
     else
     {
-		aff_properties.put("duration",new Long(totalms*1000));    	
+		aff_properties.put("duration", totalms*1000);
     }
     oggBitStream_ = bitStream;
     init_jorbis();
@@ -213,11 +213,11 @@ public class VorbisAudioFileReader extends TAudioFileReader
 		maxbitrate = Integer.parseInt(st.nextToken());
 	  }
     }
-	if (nominalbitrate > 0) af_properties.put("bitrate",new Integer(nominalbitrate));
-	af_properties.put("vbr",new Boolean(true));
+	if (nominalbitrate > 0) af_properties.put("bitrate", nominalbitrate);
+	af_properties.put("vbr", true);
 	
-	if (minbitrate > 0)  aff_properties.put("ogg.bitrate.min.bps",new Integer(minbitrate));
-	if (maxbitrate > 0)  aff_properties.put("ogg.bitrate.max.bps",new Integer(maxbitrate));
+	if (minbitrate > 0)  aff_properties.put("ogg.bitrate.min.bps", minbitrate);
+	if (maxbitrate > 0)  aff_properties.put("ogg.bitrate.max.bps", maxbitrate);
 	if (nominalbitrate > 0) aff_properties.put("ogg.bitrate.nominal.bps",new Integer(nominalbitrate));
 	if (vorbisInfo.channels > 0) aff_properties.put("ogg.channels",new Integer(vorbisInfo.channels));
 	if (vorbisInfo.rate > 0) aff_properties.put("ogg.frequency.hz",new Integer(vorbisInfo.rate));

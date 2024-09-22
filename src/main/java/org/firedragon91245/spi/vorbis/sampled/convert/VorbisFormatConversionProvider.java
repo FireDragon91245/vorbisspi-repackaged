@@ -20,10 +20,10 @@
  *
  */
  
-package javazoom.spi.vorbis.sampled.convert;
+package org.firedragon91245.spi.vorbis.sampled.convert;
 
 import java.util.Arrays;
-import javazoom.spi.vorbis.sampled.file.VorbisEncoding;
+import org.firedragon91245.spi.vorbis.sampled.file.VorbisEncoding;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 

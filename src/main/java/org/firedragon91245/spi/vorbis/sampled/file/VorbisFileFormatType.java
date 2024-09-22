@@ -1,5 +1,5 @@
 /*
- *   VorbisEncoding.
+ *   VorbisFileFormatType.
  * 
  *   JavaZOOM : vorbisspi@javazoom.net
  *              http://www.javazoom.net
@@ -20,22 +20,22 @@
  *
  */
 
-package javazoom.spi.vorbis.sampled.file;
+package org.firedragon91245.spi.vorbis.sampled.file;
 
-import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFileFormat;
 
 /**
- * Encodings used by the VORBIS audio decoder.
+ * FileFormatTypes used by the VORBIS audio decoder.
  */
-public class VorbisEncoding extends AudioFormat.Encoding
+public class VorbisFileFormatType extends AudioFileFormat.Type
 {
-  public static final AudioFormat.Encoding VORBISENC = new VorbisEncoding("VORBISENC");
-
+  public static final AudioFileFormat.Type VORBIS = new VorbisFileFormatType("VORBIS", "ogg");
+  public static final AudioFileFormat.Type OGG = new VorbisFileFormatType("OGG", "ogg");
   /**
-   * Constructors.
+   * Constructor.
    */
-  public VorbisEncoding(String name)
+  public VorbisFileFormatType(String name, String extension)
   {
-    super(name);
+    super(name, extension);
   }
 }

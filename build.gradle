@@ -1,8 +1,11 @@
 plugins {
     id 'java'
+    id 'org.javamodularity.moduleplugin' version '1.8.15'
 }
 
-group = 'org.example'
+apply plugin: "org.javamodularity.moduleplugin"
+
+group = 'org.firedragon91245.spi'
 version = '1.0-SNAPSHOT'
 
 repositories {
@@ -10,6 +13,9 @@ repositories {
 }
 
 dependencies {
+    implementation("com.googlecode.soundlibs:jorbis:0.0.17.4")
+    implementation("com.googlecode.soundlibs:tritonus-share:0.3.7.4")
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
