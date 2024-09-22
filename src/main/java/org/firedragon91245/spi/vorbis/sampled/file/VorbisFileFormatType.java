@@ -1,9 +1,9 @@
 /*
  *   VorbisFileFormatType.
- * 
+ *
  *   JavaZOOM : vorbisspi@javazoom.net
  *              http://www.javazoom.net
- * 
+ *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as published
  *   by the Free Software Foundation; either version 2 of the License, or
@@ -27,15 +27,14 @@ import javax.sound.sampled.AudioFileFormat;
 /**
  * FileFormatTypes used by the VORBIS audio decoder.
  */
-public class VorbisFileFormatType extends AudioFileFormat.Type
-{
-  public static final AudioFileFormat.Type VORBIS = new VorbisFileFormatType("VORBIS", "ogg");
-  public static final AudioFileFormat.Type OGG = new VorbisFileFormatType("OGG", "ogg");
-  /**
-   * Constructor.
-   */
-  public VorbisFileFormatType(String name, String extension)
-  {
-    super(name, extension);
-  }
+public class VorbisFileFormatType extends AudioFileFormat.Type {
+    public static final AudioFileFormat.Type VORBIS = new VorbisFileFormatType("VORBIS", "ogg");
+    public static final AudioFileFormat.Type OGG = new VorbisFileFormatType("OGG", "ogg");
+
+    /**
+     * Constructor.
+     */
+    public VorbisFileFormatType(String name, String extension) {
+        super(name, extension);
+    }
 }
