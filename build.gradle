@@ -6,7 +6,43 @@ plugins {
 apply plugin: "org.javamodularity.moduleplugin"
 
 group = 'org.firedragon91245.spi'
-version = '1.0-SNAPSHOT'
+project.version = releaseVersion
+
+sourceSets {
+    testapp {
+        java {
+            srcDir 'src/testapp/java'
+        }
+        resources {
+            srcDir 'src/testapp/resources'
+        }
+        compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+tasks.register('runTestApp', JavaExec) {
+    group = 'application'
+    description = 'Runs the test application to test the SPI implementation.'
+
+    classpath = sourceSets.testapp.runtimeClasspath
+    mainClass = 'org.firedragon91245.spi.testapp.Main'
+
+    standardInput = System.in
+    standardOutput = System.out
+    errorOutput = System.err
+    logging.captureStandardOutput LogLevel.LIFECYCLE
+    logging.captureStandardError LogLevel.ERROR
+}
+
+tasks.withType(Copy).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+configurations {
+    testappImplementation
+    testappRuntimeOnly
+}
 
 repositories {
     mavenCentral()
@@ -18,6 +54,17 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+jar {
+    from sourceSets.main.output
+    archiveBaseName = "${project.name}-${releaseVersion}"
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': releaseVersion
+        )
+    }
 }
 
 test {
