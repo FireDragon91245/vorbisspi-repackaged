@@ -26,13 +26,31 @@ tasks.register('runTestApp', JavaExec) {
     description = 'Runs the test application to test the SPI implementation.'
 
     classpath = sourceSets.testapp.runtimeClasspath
-    mainClass = 'org.firedragon91245.spi.testapp.Main'
+    mainClass.set('org.firedragon91245.spi.testapp.Main')
 
     standardInput = System.in
     standardOutput = System.out
     errorOutput = System.err
+
+    // Capture logs appropriately
     logging.captureStandardOutput LogLevel.LIFECYCLE
     logging.captureStandardError LogLevel.ERROR
+}
+
+tasks.register('testappJar', Jar) {
+    group = 'build'
+    description = 'Builds the test application as a JAR.'
+
+    from sourceSets.testapp.output
+    archiveBaseName.set("${project.name}-testapp-${releaseVersion}")
+    destinationDirectory.set(file("${layout.buildDirectory}/libs"))
+
+    manifest {
+        attributes(
+                'Implementation-Title': "${project.name} TestApp",
+                'Implementation-Version': releaseVersion
+        )
+    }
 }
 
 tasks.withType(Copy).configureEach {
