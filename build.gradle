@@ -1,9 +1,8 @@
 plugins {
     id 'java'
     id 'org.javamodularity.moduleplugin' version '1.8.15'
+    id 'maven-publish'
 }
-
-apply plugin: "org.javamodularity.moduleplugin"
 
 group = 'org.firedragon91245.spi'
 project.version = releaseVersion
@@ -23,7 +22,7 @@ sourceSets {
 
 tasks.register('runTestApp', JavaExec) {
     group = 'application'
-    description = 'Runs the test application to test the SPI implementation.'
+    projectDescription = 'Runs the test application to test the SPI implementation.'
 
     classpath = sourceSets.testapp.runtimeClasspath
     mainClass.set('org.firedragon91245.spi.testapp.Main')
@@ -39,7 +38,7 @@ tasks.register('runTestApp', JavaExec) {
 
 tasks.register('testappJar', Jar) {
     group = 'build'
-    description = 'Builds the test application as a JAR.'
+    projectDescription = 'Builds the test application as a JAR.'
 
     from sourceSets.testapp.output
     archiveBaseName.set("${project.name}-testapp-${releaseVersion}")
@@ -76,15 +75,83 @@ dependencies {
 
 jar {
     from sourceSets.main.output
-    archiveBaseName = "${project.name}-${releaseVersion}"
+    archiveFileName = "${project.name}-${releaseVersion}.jar"
     manifest {
         attributes(
                 'Implementation-Title': project.name,
-                'Implementation-Version': releaseVersion
+                'Implementation-Version': project.version
         )
     }
 }
 
 test {
     useJUnitPlatform()
+}
+
+// Maven Publish
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+tasks.register('javadocJar', Jar) {
+    archiveClassifier.set('javadoc')
+    from javadoc
+}
+
+javadoc {
+    failOnError = false
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            // Attach the sources and Javadoc JARs
+            artifact tasks.named('sourcesJar').get()
+            artifact tasks.named('javadocJar').get()
+
+            // Customize the generated POM
+            pom {
+                name = project.name
+                description = projectDescription
+                url = projectUrl
+
+                licenses {
+                    license {
+                        name = primaryLicense
+                        url = primaryLicenseUrl
+                    }
+                    license {
+                        name = originalLicense
+                        url = originalLicenseUrl
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'FireDragon91245'
+                        name = 'FireDragon91245'
+                        email = 'firedragon91245@gmail.com'
+                    }
+                    developer {
+                        id = 'JavaZOOM'
+                        name = 'JavaZOOM'
+                        email = 'vorbisspi@javazoom.net'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/FireDragon91245/vorbisspi-repackaged.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:FireDragon91245/vorbisspi-repackaged.git'
+                    url = projectUrl
+                }
+            }
+        }
+    }
+
+    repositories {
+
+    }
 }
