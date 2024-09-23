@@ -28,16 +28,16 @@ import javax.sound.sampled.AudioFormat;
 import java.util.Map;
 
 /**
- * @author JavaZOOM
+ * @author FireDragon91245, JavaZOOM
  */
 public class VorbisAudioFileFormat extends TAudioFileFormat {
     /**
-     * Contructor.
+     * Constructor.
      *
-     * @param type
-     * @param audioFormat
-     * @param nLengthInFrames
-     * @param nLengthInBytes
+     * @param type type
+     * @param audioFormat audioFormat
+     * @param nLengthInFrames nLengthInFrames
+     * @param nLengthInBytes nLengthInBytes
      */
     public VorbisAudioFileFormat(Type type, AudioFormat audioFormat, int nLengthInFrames, int nLengthInBytes, Map<String, Object> properties) {
         super(type, audioFormat, nLengthInFrames, nLengthInBytes, properties);

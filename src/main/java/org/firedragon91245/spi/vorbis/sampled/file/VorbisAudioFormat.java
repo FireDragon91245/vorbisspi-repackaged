@@ -28,20 +28,20 @@ import javax.sound.sampled.AudioFormat;
 import java.util.Map;
 
 /**
- * @author JavaZOOM
+ * @author FireDragon91245, JavaZOOM
  */
 public class VorbisAudioFormat extends TAudioFormat {
     /**
      * Constructor.
      *
-     * @param encoding
-     * @param nFrequency
-     * @param SampleSizeInBits
-     * @param nChannels
-     * @param FrameSize
-     * @param FrameRate
-     * @param isBigEndian
-     * @param properties
+     * @param encoding encoding
+     * @param nFrequency nFrequency
+     * @param SampleSizeInBits SampleSizeInBits
+     * @param nChannels nChannels
+     * @param FrameSize FrameSize
+     * @param FrameRate FrameRate
+     * @param isBigEndian isBigEndian
+     * @param properties properties
      */
     public VorbisAudioFormat(AudioFormat.Encoding encoding, float nFrequency, int SampleSizeInBits, int nChannels, int FrameSize, float FrameRate, boolean isBigEndian, Map<String, Object> properties) {
         super(encoding, nFrequency, SampleSizeInBits, nChannels, FrameSize, FrameRate, isBigEndian, properties);
@@ -57,7 +57,7 @@ public class VorbisAudioFormat extends TAudioFormat {
      * <li><b>vbr</b> [Boolean], VBR flag.
      * </ul>
      */
-    public Map properties() {
+    public Map<String, Object> properties() {
         return super.properties();
     }
 }	

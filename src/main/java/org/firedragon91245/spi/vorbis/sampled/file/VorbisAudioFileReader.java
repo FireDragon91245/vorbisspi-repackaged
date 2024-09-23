@@ -33,6 +33,7 @@ import org.tritonus.share.sampled.file.TAudioFileReader;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -42,18 +43,14 @@ import java.util.StringTokenizer;
  * Ogg Vorbis file reader for use with the Java Sound Service Provider Interface.
  */
 public class VorbisAudioFileReader extends TAudioFileReader {
-    private static final int INITAL_READ_LENGTH = 64000;
-    private static final int MARK_LIMIT = INITAL_READ_LENGTH + 1;
+    private static final int INITIAL_READ_LENGTH = 64000;
+    private static final int MARK_LIMIT = INITIAL_READ_LENGTH + 1;
     private SyncState oggSyncState_ = null;
     private StreamState oggStreamState_ = null;
     private Page oggPage_ = null;
     private Packet oggPacket_ = null;
     private Info vorbisInfo = null;
     private Comment vorbisComment = null;
-    private DspState vorbisDspState = null;
-    private Block vorbisBlock = null;
-    private int bufferMultiple_ = 4;
-    private int bufferSize_ = bufferMultiple_ * 256 * 2;
     private byte[] buffer = null;
     private int bytes = 0;
     private int index = 0;
@@ -68,19 +65,14 @@ public class VorbisAudioFileReader extends TAudioFileReader {
      */
     public AudioFileFormat getAudioFileFormat(File file) throws UnsupportedAudioFileException, IOException {
         if (TDebug.TraceAudioFileReader) TDebug.out("getAudioFileFormat(File file)");
-        InputStream inputStream = null;
-        try {
-            inputStream = new BufferedInputStream(new FileInputStream(file));
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
             inputStream.mark(MARK_LIMIT);
-            AudioFileFormat aff = getAudioFileFormat(inputStream);
             inputStream.reset();
             // Get Vorbis file info such as length in seconds.
             VorbisFile vf = new VorbisFile(file.getAbsolutePath());
             return getAudioFileFormat(inputStream, (int) file.length(), Math.round((vf.time_total(-1)) * 1000));
         } catch (JOrbisException e) {
             throw new IOException(e.getMessage());
-        } finally {
-            if (inputStream != null) inputStream.close();
         }
     }
 
@@ -89,11 +81,8 @@ public class VorbisAudioFileReader extends TAudioFileReader {
      */
     public AudioFileFormat getAudioFileFormat(URL url) throws UnsupportedAudioFileException, IOException {
         if (TDebug.TraceAudioFileReader) TDebug.out("getAudioFileFormat(URL url)");
-        InputStream inputStream = url.openStream();
-        try {
+        try (InputStream inputStream = url.openStream()) {
             return getAudioFileFormat(inputStream);
-        } finally {
-            if (inputStream != null) inputStream.close();
         }
     }
 
@@ -129,16 +118,14 @@ public class VorbisAudioFileReader extends TAudioFileReader {
         if (totalms == AudioSystem.NOT_SPECIFIED) {
             totalms = 0;
         }
-        if (totalms <= 0) {
-            totalms = 0;
-        } else {
+        if (totalms > 0) {
             aff_properties.put("duration", totalms * 1000);
         }
         oggBitStream_ = bitStream;
         init_jorbis();
         index = 0;
         try {
-            readHeaders(aff_properties, af_properties);
+            readHeaders(aff_properties);
         } catch (IOException ioe) {
             if (TDebug.TraceAudioFileReader) {
                 TDebug.out(ioe.getMessage());
@@ -183,8 +170,8 @@ public class VorbisAudioFileReader extends TAudioFileReader {
 
         // Patch from MS to ensure more SPI compatibility ...
         float frameRate = -1;
-        if (nominalbitrate > 0) frameRate = nominalbitrate / 8;
-        else if (minbitrate > 0) frameRate = minbitrate / 8;
+        if (nominalbitrate > 0) frameRate = (float) nominalbitrate / 8;
+        else if (minbitrate > 0) frameRate = (float) minbitrate / 8;
 
         AudioFormat.Encoding encoding = VorbisEncoding.VORBISENC;
         // New Patch from MS:
@@ -229,7 +216,7 @@ public class VorbisAudioFileReader extends TAudioFileReader {
         try {
             return getAudioInputStream(inputStream);
         } catch (UnsupportedAudioFileException | IOException e) {
-            if (inputStream != null) inputStream.close();
+            inputStream.close();
             throw e;
         }
     }
@@ -251,12 +238,14 @@ public class VorbisAudioFileReader extends TAudioFileReader {
     /**
      * Reads headers and comments.
      */
-    private void readHeaders(Map<String, Object> aff_properties, Map<String, Object> af_properties) throws IOException {
+    private void readHeaders(Map<String, Object> aff_properties) throws IOException {
         if (TDebug.TraceAudioConverter) TDebug.out("readHeaders(");
 
+        int bufferMultiple_ = 4;
+        int bufferSize_ = bufferMultiple_ * 256 * 2;
         index = oggSyncState_.buffer(bufferSize_);
         buffer = oggSyncState_.data;
-        bytes = readFromStream(buffer, index, bufferSize_);
+        bytes = readFromStream(buffer, index);
         if (bytes == -1) {
             if (TDebug.TraceAudioConverter) TDebug.out("Cannot get any data from selected Ogg bitstream.");
             throw new IOException("Cannot get any data from selected Ogg bitstream.");
@@ -313,7 +302,7 @@ public class VorbisAudioFileReader extends TAudioFileReader {
             }
             index = oggSyncState_.buffer(bufferSize_);
             buffer = oggSyncState_.data;
-            bytes = readFromStream(buffer, index, bufferSize_);
+            bytes = readFromStream(buffer, index);
             if (bytes == -1) {
                 break;
             }
@@ -325,13 +314,13 @@ public class VorbisAudioFileReader extends TAudioFileReader {
         }
         // Read Ogg Vorbis comments.
         byte[][] ptr = vorbisComment.user_comments;
-        String currComment = "";
+        String currComment;
         int c = 0;
-        for (int j = 0; j < ptr.length; j++) {
-            if (ptr[j] == null) {
+        for (byte[] value : ptr) {
+            if (value == null) {
                 break;
             }
-            currComment = (new String(ptr[j], 0, ptr[j].length - 1, "UTF-8")).trim();
+            currComment = (new String(value, 0, value.length - 1, StandardCharsets.UTF_8)).trim();
             if (TDebug.TraceAudioConverter) TDebug.out(currComment);
             if (currComment.toLowerCase().startsWith("artist")) {
                 aff_properties.put("author", currComment.substring(7));
@@ -363,10 +352,10 @@ public class VorbisAudioFileReader extends TAudioFileReader {
      *
      * @return the number of bytes read or -1 if error.
      */
-    private int readFromStream(byte[] buffer, int index, int bufferSize_) {
-        int bytes = 0;
+    private int readFromStream(byte[] buffer, int index) {
+        int bytes;
         try {
-            bytes = oggBitStream_.read(buffer, index, bufferSize_);
+            bytes = oggBitStream_.read(buffer, index, 2048);
         } catch (Exception e) {
             if (TDebug.TraceAudioFileReader) {
                 TDebug.out("Cannot Read Selected Song");
@@ -386,8 +375,8 @@ public class VorbisAudioFileReader extends TAudioFileReader {
         oggPacket_ = new Packet();
         vorbisInfo = new Info();
         vorbisComment = new Comment();
-        vorbisDspState = new DspState();
-        vorbisBlock = new Block(vorbisDspState);
+        DspState vorbisDspState = new DspState();
+        new Block(vorbisDspState);
         buffer = null;
         bytes = 0;
         oggSyncState_.init();

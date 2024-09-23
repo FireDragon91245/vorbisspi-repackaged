@@ -28,6 +28,7 @@ import javax.sound.sampled.AudioFileFormat;
  * FileFormatTypes used by the VORBIS audio decoder.
  */
 public class VorbisFileFormatType extends AudioFileFormat.Type {
+    @SuppressWarnings("unused")
     public static final AudioFileFormat.Type VORBIS = new VorbisFileFormatType("VORBIS", "ogg");
     public static final AudioFileFormat.Type OGG = new VorbisFileFormatType("OGG", "ogg");
 

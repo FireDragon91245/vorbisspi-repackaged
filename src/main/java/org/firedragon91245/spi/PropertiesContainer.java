@@ -26,5 +26,5 @@ import java.util.Map;
 
 public interface PropertiesContainer
 {
-	public Map properties();
+	public Map<String, Object> properties();
 }

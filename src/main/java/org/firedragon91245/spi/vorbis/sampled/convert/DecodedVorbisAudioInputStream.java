@@ -53,7 +53,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
     static final int playState_Corrupt = -1;
     // bout is now a global so that we can continue from when we have a buffer full.
     int bout = 0;
-    private InputStream oggBitStream_ = null;
+    private final InputStream oggBitStream_;
     private SyncState oggSyncState_ = null;
     private StreamState oggStreamState_ = null;
     private Page oggPage_ = null;
@@ -63,17 +63,17 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
     private DspState vorbisDspState = null;
     private Block vorbisBlock = null;
     private int playState;
-    private int bufferMultiple_ = 4;
-    private int bufferSize_ = bufferMultiple_ * 256 * 2;
+    private final int bufferMultiple_ = 4;
+    private final int bufferSize_ = bufferMultiple_ * 256 * 2;
     private int convsize = bufferSize_ * 2;
-    private byte[] convbuffer = new byte[convsize];
+    private final byte[] convbuffer = new byte[convsize];
     private byte[] buffer = null;
     private int bytes = 0;
     private float[][][] _pcmf = null;
     private int[] _index = null;
     private int index = 0;
     private int i = 0;
-    private HashMap properties = null;
+    private Map<String, Object> properties = null;
     private long currentBytes = 0;
 
     /**
@@ -85,7 +85,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
         init_jorbis();
         index = 0;
         playState = playState_NeedHeaders;
-        properties = new HashMap();
+        properties = new HashMap<>();
     }
 
     /**
@@ -113,7 +113,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
      * <li><b>ogg.position.byte</b> [Long], current position in bytes in the stream.
      * </ul>
      */
-    public Map properties() {
+    public Map<String, Object> properties() {
         properties.put("ogg.position.byte", currentBytes);
         return properties;
     }
@@ -148,6 +148,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
         // modified by jOggPlayer developer and adapted by JavaZOOM to suit the JavaSound
         // SPI. Then further modified by Tom Kimpton to correctly play ogg files that
         // would hang the player.
+        int result;
         switch (playState) {
             case playState_NeedHeaders:
                 try {
@@ -160,11 +161,11 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
                 playState = playState_ReadData;
                 break;
 
+
             case playState_ReadData:
-                int result;
                 index = oggSyncState_.buffer(bufferSize_);
                 buffer = oggSyncState_.data;
-                bytes = readFromStream(buffer, index, bufferSize_);
+                bytes = readFromStream(buffer, index);
                 if (TDebug.TraceAudioConverter) TDebug.out("More data : " + bytes);
                 if (bytes == -1) {
                     playState = playState_Done;
@@ -221,7 +222,6 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
                             TDebug.out("Corrupt or missing data in packetout bitstream; going to read state...");
                         // playState = playState_ReadData;
                         // break;
-                        continue;
                     } else {
                         // we have a packet.  Decode it
                         if (vorbisBlock.synthesis(oggPacket_) == 0) { // test for success!
@@ -279,8 +279,8 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
         int samples;
         while ((samples = vorbisDspState.synthesis_pcmout(_pcmf, _index)) > 0) {
             float[][] pcmf = _pcmf[0];
-            bout = (samples < convsize ? samples : convsize);
-            double fVal = 0.0;
+            bout = Math.min(samples, convsize);
+            double fVal;
             // convert doubles to 16 bit signed ints (host order) and
             // interleave
             for (i = 0; i < vorbisInfo.channels; i++) {
@@ -340,7 +340,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
         if (TDebug.TraceAudioConverter) TDebug.out("readHeaders(");
         index = oggSyncState_.buffer(bufferSize_);
         buffer = oggSyncState_.data;
-        bytes = readFromStream(buffer, index, bufferSize_);
+        bytes = readFromStream(buffer, index);
         if (bytes == -1) {
             if (TDebug.TraceAudioConverter) TDebug.out("Cannot get any data from selected Ogg bitstream.");
             throw new IOException("Cannot get any data from selected Ogg bitstream.");
@@ -397,7 +397,7 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
             }
             index = oggSyncState_.buffer(bufferSize_);
             buffer = oggSyncState_.data;
-            bytes = readFromStream(buffer, index, bufferSize_);
+            bytes = readFromStream(buffer, index);
             if (bytes == -1) {
                 break;
             }
@@ -409,13 +409,13 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
         }
 
         byte[][] ptr = vorbisComment.user_comments;
-        String currComment = "";
+        String currComment;
 
-        for (int j = 0; j < ptr.length; j++) {
-            if (ptr[j] == null) {
+        for (byte[] value : ptr) {
+            if (value == null) {
                 break;
             }
-            currComment = (new String(ptr[j], 0, ptr[j].length - 1)).trim();
+            currComment = (new String(value, 0, value.length - 1)).trim();
             if (TDebug.TraceAudioConverter) TDebug.out("Comment: " + currComment);
         }
         convsize = bufferSize_ / vorbisInfo.channels;
@@ -429,15 +429,14 @@ public class DecodedVorbisAudioInputStream extends TAsynchronousFilteredAudioInp
      * Reads from the oggBitStream_ a specified number of Bytes(bufferSize_) worth
      * starting at index and puts them in the specified buffer[].
      *
-     * @param buffer
-     * @param index
-     * @param bufferSize_
+     * @param buffer buffer
+     * @param index  index
      * @return the number of bytes read or -1 if error.
      */
-    private int readFromStream(byte[] buffer, int index, int bufferSize_) {
-        int bytes = 0;
+    private int readFromStream(byte[] buffer, int index) {
+        int bytes;
         try {
-            bytes = oggBitStream_.read(buffer, index, bufferSize_);
+            bytes = oggBitStream_.read(buffer, index, 2048);
         } catch (Exception e) {
             if (TDebug.TraceAudioConverter) TDebug.out("Cannot Read Selected Song");
             bytes = -1;
